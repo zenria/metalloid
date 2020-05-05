@@ -1,16 +1,17 @@
 use crate::state::{ApplyError, ApplyStatus};
 use crate::{Executor, State, Target};
 
-pub trait IfChanged: State + Sized {
-    fn if_changed(self, dep: &dyn State) -> IfChangedState<Self> {
-        IfChangedState { state: self, dep }
+pub struct IfChangedState<'dep, S: State, D: State> {
+    state: S,
+    dep: &'dep D,
+}
+impl<'dep, S: State, D: State> IfChangedState<'dep, S, D> {
+    pub(crate) fn new(state: S, dep: &'dep D) -> Self {
+        Self { state, dep }
     }
 }
-pub struct IfChangedState<'dep, S: State> {
-    state: S,
-    dep: &'dep dyn State,
-}
-impl<'dep, S: State> State for IfChangedState<'dep, S> {
+
+impl<'dep, S: State, D: State> State for IfChangedState<'dep, S, D> {
     fn apply(
         &self,
         executor: &dyn Executor,

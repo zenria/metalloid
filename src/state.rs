@@ -1,12 +1,15 @@
 use crate::{Executor, Target};
 
+use crate::state::compose::ComposedState;
+use crate::state::depends_on::DependOnState;
+use crate::state::if_changed::IfChangedState;
+use crate::state::only_if::OnlyIfState;
 use thiserror::Error;
 
 pub(crate) mod compose;
-pub(crate) mod condition;
 pub(crate) mod depends_on;
-pub(crate) mod graph;
 pub(crate) mod if_changed;
+pub(crate) mod only_if;
 
 #[derive(Error, Debug)]
 #[error("Error executing {0}")]
@@ -30,7 +33,7 @@ impl std::ops::Add for ApplyStatus {
     }
 }
 
-pub trait State {
+pub trait State: Sized {
     fn apply(
         &self,
         executor: &dyn Executor,
@@ -38,6 +41,22 @@ pub trait State {
     ) -> Result<ApplyStatus, ApplyError>;
 
     fn name(&self) -> String;
+
+    fn depends_on<D: State>(self, dep: &D) -> DependOnState<Self, D> {
+        DependOnState::new(self, dep)
+    }
+
+    fn if_changed<D: State>(self, dep: &D) -> IfChangedState<Self, D> {
+        IfChangedState::new(self, dep)
+    }
+
+    fn compose<R: State>(self, other: R) -> ComposedState<Self, R> {
+        ComposedState::new(self, other)
+    }
+
+    fn only_if<F: Fn(&dyn Target) -> bool>(self, cond: F) -> OnlyIfState<Self, F> {
+        OnlyIfState::new(self, cond)
+    }
 }
 
 pub struct NOOP;

@@ -5,8 +5,6 @@ mod state;
 mod target;
 
 pub use executor::Executor;
-pub use state::condition::CondState;
-pub use state::graph::GraphState;
 pub use state::State;
 
 pub use target::{Os, OsType, Target};
@@ -15,6 +13,7 @@ pub use target::{Os, OsType, Target};
 mod tests {
 
     use super::*;
+    use crate::state::NOOP;
 
     struct TestTarget;
     impl Target for TestTarget {
@@ -36,21 +35,13 @@ mod tests {
         let target = TestTarget;
         let executor = TestExecutor;
 
-        /* // just try some constructions
-        let root = GraphState::new("root", |b| {
-            b.add(state::NOOP);
-            b.add(
-                CondState::new()
-                    .apply_if(state::NOOP, |t| {
-                        t.os().vendor() == "ubuntu" && t.os().version() == "16.04"
-                    })
-                    .apply_if(state::NOOP, |t| {
-                        t.os().vendor() == "ubuntu" && t.os().version() == "18.04"
-                    }),
-            );
-            let some_config_file = b.add(state::NOOP);
+        let composed = NOOP.compose(NOOP);
 
-            b.add(state::NOOP).depends_on(some_config_file);
-        });*/
+        let depends_of_composed = NOOP.depends_on(&composed);
+        let also_depends_of_composed = NOOP.depends_on(&composed);
+
+        let root = composed
+            .compose(depends_of_composed)
+            .compose(also_depends_of_composed);
     }
 }
