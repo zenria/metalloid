@@ -2,6 +2,7 @@ use crate::{Executor, Target};
 
 use thiserror::Error;
 
+pub(crate) mod compose;
 pub(crate) mod condition;
 pub(crate) mod depends_on;
 pub(crate) mod graph;
