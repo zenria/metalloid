@@ -6,6 +6,7 @@ mod target;
 
 pub use executor::Executor;
 pub use state::State;
+pub use state::StateExt;
 
 pub use target::{Os, OsType, Target};
 

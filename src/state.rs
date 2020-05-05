@@ -33,7 +33,7 @@ impl std::ops::Add for ApplyStatus {
     }
 }
 
-pub trait State: Sized {
+pub trait State {
     fn apply(
         &self,
         executor: &dyn Executor,
@@ -41,20 +41,40 @@ pub trait State: Sized {
     ) -> Result<ApplyStatus, ApplyError>;
 
     fn name(&self) -> String;
+}
 
-    fn depends_on<D: State>(self, dep: &D) -> DependOnState<Self, D> {
+impl<T: State + ?Sized> StateExt for T {}
+
+pub trait StateExt: State {
+    fn depends_on<D>(self, dep: &D) -> DependOnState<Self, D>
+    where
+        D: State,
+        Self: Sized,
+    {
         DependOnState::new(self, dep)
     }
 
-    fn if_changed<D: State>(self, dep: &D) -> IfChangedState<Self, D> {
+    fn if_changed<D>(self, dep: &D) -> IfChangedState<Self, D>
+    where
+        D: State,
+        Self: Sized,
+    {
         IfChangedState::new(self, dep)
     }
 
-    fn compose<R: State>(self, other: R) -> ComposedState<Self, R> {
+    fn compose<R>(self, other: R) -> ComposedState<Self, R>
+    where
+        R: State,
+        Self: Sized,
+    {
         ComposedState::new(self, other)
     }
 
-    fn only_if<F: Fn(&dyn Target) -> bool>(self, cond: F) -> OnlyIfState<Self, F> {
+    fn only_if<F>(self, cond: F) -> OnlyIfState<Self, F>
+    where
+        F: Fn(&dyn Target) -> bool,
+        Self: Sized,
+    {
         OnlyIfState::new(self, cond)
     }
 }
