@@ -4,11 +4,10 @@ use crate::state::compose::ComposedState;
 use crate::state::depends_on::DependOnState;
 use crate::state::if_changed::IfChangedState;
 use crate::state::only_if::OnlyIfState;
+use std::ops::Deref;
 use thiserror::Error;
 
 pub(crate) mod compose;
-pub(crate) mod depends_on;
-pub(crate) mod if_changed;
 pub(crate) mod only_if;
 
 #[derive(Error, Debug)]
@@ -46,22 +45,6 @@ pub trait State {
 impl<T: State + ?Sized> StateExt for T {}
 
 pub trait StateExt: State {
-    fn depends_on<D>(self, dep: &D) -> DependOnState<Self, D>
-    where
-        D: State,
-        Self: Sized,
-    {
-        DependOnState::new(self, dep)
-    }
-
-    fn if_changed<D>(self, dep: &D) -> IfChangedState<Self, D>
-    where
-        D: State,
-        Self: Sized,
-    {
-        IfChangedState::new(self, dep)
-    }
-
     fn compose<R>(self, other: R) -> ComposedState<Self, R>
     where
         R: State,

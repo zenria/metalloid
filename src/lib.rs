@@ -38,11 +38,8 @@ mod tests {
 
         let composed = NOOP.compose(NOOP);
 
-        let depends_of_composed = NOOP.depends_on(&composed);
-        let also_depends_of_composed = NOOP.depends_on(&composed);
+        let onlyif = NOOP.only_if(|t| t.os().version() == "16.04");
 
-        let root = composed
-            .compose(depends_of_composed)
-            .compose(also_depends_of_composed);
+        let superset = composed.compose(onlyif);
     }
 }
