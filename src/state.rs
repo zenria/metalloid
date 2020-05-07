@@ -1,10 +1,7 @@
 use crate::{Executor, Target};
 
 use crate::state::compose::ComposedState;
-use crate::state::depends_on::DependOnState;
-use crate::state::if_changed::IfChangedState;
 use crate::state::only_if::OnlyIfState;
-use std::ops::Deref;
 use thiserror::Error;
 
 pub(crate) mod compose;

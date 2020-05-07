@@ -1,6 +1,7 @@
 #![allow(dead_code)]
 
 mod executor;
+mod graph;
 mod state;
 mod target;
 
@@ -33,13 +34,13 @@ mod tests {
 
     #[test]
     fn it_works() {
-        let target = TestTarget;
-        let executor = TestExecutor;
+        let _target = TestTarget;
+        let _executor = TestExecutor;
 
         let composed = NOOP.compose(NOOP);
 
         let onlyif = NOOP.only_if(|t| t.os().version() == "16.04");
 
-        let superset = composed.compose(onlyif);
+        let _superset = composed.compose(onlyif);
     }
 }
