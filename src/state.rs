@@ -2,6 +2,7 @@ use crate::{Executor, Target};
 
 use crate::state::compose::ComposedState;
 use crate::state::only_if::OnlyIfState;
+use std::ops::Add;
 use thiserror::Error;
 
 pub(crate) mod compose;
@@ -11,7 +12,7 @@ pub(crate) mod only_if;
 #[error("Error executing {0}")]
 pub struct ApplyError(String);
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ApplyStatus {
     Changed,
     NotChanged,
@@ -59,7 +60,7 @@ pub trait StateExt: State {
     }
 }
 
-pub struct NOOP;
+pub struct NOOP(pub &'static str);
 impl State for NOOP {
     fn apply(
         &self,
@@ -70,6 +71,27 @@ impl State for NOOP {
     }
 
     fn name(&self) -> String {
-        "no-operation".into()
+        self.0.into()
+    }
+}
+
+pub struct PrintAndApplyRandomly(pub &'static str);
+impl State for PrintAndApplyRandomly {
+    fn apply(
+        &self,
+        _executor: &dyn Executor,
+        _target: &dyn Target,
+    ) -> Result<ApplyStatus, ApplyError> {
+        let state = if rand::random() {
+            ApplyStatus::Changed
+        } else {
+            ApplyStatus::NotChanged
+        };
+        println!("{} - {:?}", self.0, state);
+        Ok(state)
+    }
+
+    fn name(&self) -> String {
+        self.0.into()
     }
 }

@@ -12,12 +12,13 @@ pub use state::StateExt;
 pub use target::{Os, OsType, Target};
 
 #[cfg(test)]
-mod tests {
+pub mod tests {
 
     use super::*;
+    use crate::executor::NOOPExecutor;
     use crate::state::NOOP;
 
-    struct TestTarget;
+    pub struct TestTarget;
     impl Target for TestTarget {
         fn hostname(&self) -> &str {
             "foobar"
@@ -29,17 +30,14 @@ mod tests {
         }
     }
 
-    struct TestExecutor;
-    impl Executor for TestExecutor {}
-
     #[test]
     fn it_works() {
         let _target = TestTarget;
-        let _executor = TestExecutor;
+        let _executor = NOOPExecutor;
 
-        let composed = NOOP.compose(NOOP);
+        let composed = NOOP("state1").compose(NOOP("state2"));
 
-        let onlyif = NOOP.only_if(|t| t.os().version() == "16.04");
+        let onlyif = NOOP("state3").only_if(|t| t.os().version() == "16.04");
 
         let _superset = composed.compose(onlyif);
     }

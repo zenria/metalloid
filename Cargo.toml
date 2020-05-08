@@ -10,3 +10,5 @@ description = "Configuration management for developers"
 
 [dependencies]
 thiserror="1"
+daggy="0.6"
+rand="*"
